@@ -32,6 +32,27 @@ export interface UsageSummary {
 
 export type AdapterBillingType = "api" | "subscription" | "unknown";
 
+export interface AdapterRuntimeServiceReport {
+  id?: string | null;
+  projectId?: string | null;
+  projectWorkspaceId?: string | null;
+  issueId?: string | null;
+  scopeType?: "project_workspace" | "execution_workspace" | "run" | "agent";
+  scopeId?: string | null;
+  serviceName: string;
+  status?: "starting" | "running" | "stopped" | "failed";
+  lifecycle?: "shared" | "ephemeral";
+  reuseKey?: string | null;
+  command?: string | null;
+  cwd?: string | null;
+  port?: number | null;
+  url?: string | null;
+  providerRef?: string | null;
+  ownerAgentId?: string | null;
+  stopPolicy?: Record<string, unknown> | null;
+  healthStatus?: "unknown" | "healthy" | "unhealthy";
+}
+
 export interface AdapterExecutionResult {
   exitCode: number | null;
   signal: string | null;
@@ -51,8 +72,17 @@ export interface AdapterExecutionResult {
   billingType?: AdapterBillingType | null;
   costUsd?: number | null;
   resultJson?: Record<string, unknown> | null;
+  runtimeServices?: AdapterRuntimeServiceReport[];
   summary?: string | null;
   clearSession?: boolean;
+  question?: {
+    prompt: string;
+    choices: Array<{
+      key: string;
+      label: string;
+      description?: string;
+    }>;
+  } | null;
 }
 
 export interface AdapterSessionCodec {
@@ -69,6 +99,7 @@ export interface AdapterInvocationMeta {
   commandNotes?: string[];
   env?: Record<string, string>;
   prompt?: string;
+  promptMetrics?: Record<string, number>;
   context?: Record<string, unknown>;
 }
 
@@ -140,6 +171,33 @@ export interface HireApprovedHookResult {
   detail?: Record<string, unknown>;
 }
 
+// ---------------------------------------------------------------------------
+// Quota window types — used by adapters that can report provider quota/rate-limit state
+// ---------------------------------------------------------------------------
+
+/** a single rate-limit or usage window returned by a provider quota API */
+export interface QuotaWindow {
+  /** human label, e.g. "5h", "7d", "Sonnet 7d", "Credits" */
+  label: string;
+  /** percent of the window already consumed (0-100), null when not reported */
+  usedPercent: number | null;
+  /** iso timestamp when this window resets, null when not reported */
+  resetsAt: string | null;
+  /** free-form value label for credit-style windows, e.g. "$4.20 remaining" */
+  valueLabel: string | null;
+}
+
+/** result for one provider from getQuotaWindows() */
+export interface ProviderQuotaResult {
+  /** provider slug, e.g. "anthropic", "openai" */
+  provider: string;
+  /** true when the fetch succeeded and windows is populated */
+  ok: boolean;
+  /** error message when ok is false */
+  error?: string;
+  windows: QuotaWindow[];
+}
+
 export interface ServerAdapterModule {
   type: string;
   execute(ctx: AdapterExecutionContext): Promise<AdapterExecutionResult>;
@@ -157,6 +215,12 @@ export interface ServerAdapterModule {
     payload: HireApprovedPayload,
     adapterConfig: Record<string, unknown>,
   ) => Promise<HireApprovedHookResult>;
+  /**
+   * Optional: fetch live provider quota/rate-limit windows for this adapter.
+   * Returns a ProviderQuotaResult so the server can aggregate across adapters
+   * without knowing provider-specific credential paths or API shapes.
+   */
+  getQuotaWindows?: () => Promise<ProviderQuotaResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -167,7 +231,7 @@ export type TranscriptEntry =
   | { kind: "assistant"; ts: string; text: string; delta?: boolean }
   | { kind: "thinking"; ts: string; text: string; delta?: boolean }
   | { kind: "user"; ts: string; text: string }
-  | { kind: "tool_call"; ts: string; name: string; input: unknown }
+  | { kind: "tool_call"; ts: string; name: string; input: unknown; toolUseId?: string }
   | { kind: "tool_result"; ts: string; toolUseId: string; content: string; isError: boolean }
   | { kind: "init"; ts: string; model: string; sessionId: string }
   | { kind: "result"; ts: string; text: string; inputTokens: number; outputTokens: number; cachedTokens: number; costUsd: number; subtype: string; isError: boolean; errors: string[] }
@@ -208,6 +272,12 @@ export interface CreateConfigValues {
   envBindings: Record<string, unknown>;
   url: string;
   bootstrapPrompt: string;
+  payloadTemplateJson?: string;
+  workspaceStrategyType?: string;
+  workspaceBaseRef?: string;
+  workspaceBranchTemplate?: string;
+  worktreeParentDir?: string;
+  runtimeServicesJson?: string;
   maxTurnsPerRun: number;
   heartbeatEnabled: boolean;
   intervalSec: number;

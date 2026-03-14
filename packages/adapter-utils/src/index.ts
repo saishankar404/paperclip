@@ -3,6 +3,7 @@ export type {
   AdapterRuntime,
   UsageSummary,
   AdapterBillingType,
+  AdapterRuntimeServiceReport,
   AdapterExecutionResult,
   AdapterInvocationMeta,
   AdapterExecutionContext,
@@ -16,8 +17,16 @@ export type {
   HireApprovedPayload,
   HireApprovedHookResult,
   ServerAdapterModule,
+  QuotaWindow,
+  ProviderQuotaResult,
   TranscriptEntry,
   StdoutLineParser,
   CLIAdapterModule,
   CreateConfigValues,
 } from "./types.js";
+export {
+  REDACTED_HOME_PATH_USER,
+  redactHomePathUserSegments,
+  redactHomePathUserSegmentsInValue,
+  redactTranscriptEntryPaths,
+} from "./log-redaction.js";

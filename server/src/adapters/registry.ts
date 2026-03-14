@@ -3,12 +3,14 @@ import {
   execute as claudeExecute,
   testEnvironment as claudeTestEnvironment,
   sessionCodec as claudeSessionCodec,
+  getQuotaWindows as claudeGetQuotaWindows,
 } from "@paperclipai/adapter-claude-local/server";
 import { agentConfigurationDoc as claudeAgentConfigurationDoc, models as claudeModels } from "@paperclipai/adapter-claude-local";
 import {
   execute as codexExecute,
   testEnvironment as codexTestEnvironment,
   sessionCodec as codexSessionCodec,
+  getQuotaWindows as codexGetQuotaWindows,
 } from "@paperclipai/adapter-codex-local/server";
 import { agentConfigurationDoc as codexAgentConfigurationDoc, models as codexModels } from "@paperclipai/adapter-codex-local";
 import {
@@ -17,6 +19,12 @@ import {
   sessionCodec as cursorSessionCodec,
 } from "@paperclipai/adapter-cursor-local/server";
 import { agentConfigurationDoc as cursorAgentConfigurationDoc, models as cursorModels } from "@paperclipai/adapter-cursor-local";
+import {
+  execute as geminiExecute,
+  testEnvironment as geminiTestEnvironment,
+  sessionCodec as geminiSessionCodec,
+} from "@paperclipai/adapter-gemini-local/server";
+import { agentConfigurationDoc as geminiAgentConfigurationDoc, models as geminiModels } from "@paperclipai/adapter-gemini-local";
 import {
   execute as openCodeExecute,
   testEnvironment as openCodeTestEnvironment,
@@ -56,6 +64,7 @@ const claudeLocalAdapter: ServerAdapterModule = {
   models: claudeModels,
   supportsLocalAgentJwt: true,
   agentConfigurationDoc: claudeAgentConfigurationDoc,
+  getQuotaWindows: claudeGetQuotaWindows,
 };
 
 const codexLocalAdapter: ServerAdapterModule = {
@@ -67,6 +76,7 @@ const codexLocalAdapter: ServerAdapterModule = {
   listModels: listCodexModels,
   supportsLocalAgentJwt: true,
   agentConfigurationDoc: codexAgentConfigurationDoc,
+  getQuotaWindows: codexGetQuotaWindows,
 };
 
 const cursorLocalAdapter: ServerAdapterModule = {
@@ -78,6 +88,16 @@ const cursorLocalAdapter: ServerAdapterModule = {
   listModels: listCursorModels,
   supportsLocalAgentJwt: true,
   agentConfigurationDoc: cursorAgentConfigurationDoc,
+};
+
+const geminiLocalAdapter: ServerAdapterModule = {
+  type: "gemini_local",
+  execute: geminiExecute,
+  testEnvironment: geminiTestEnvironment,
+  sessionCodec: geminiSessionCodec,
+  models: geminiModels,
+  supportsLocalAgentJwt: true,
+  agentConfigurationDoc: geminiAgentConfigurationDoc,
 };
 
 const openclawGatewayAdapter: ServerAdapterModule = {
@@ -118,6 +138,7 @@ const adaptersByType = new Map<string, ServerAdapterModule>(
     openCodeLocalAdapter,
     piLocalAdapter,
     cursorLocalAdapter,
+    geminiLocalAdapter,
     openclawGatewayAdapter,
     processAdapter,
     httpAdapter,
