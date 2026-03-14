@@ -369,7 +369,7 @@ export function Costs() {
                       </p>
                     )}
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-bold tabular-nums">
                     {formatCents(spendData.summary.spendCents)}{" "}
                     <span className="text-base font-normal text-muted-foreground">
                       {spendData.summary.budgetCents > 0
@@ -378,9 +378,9 @@ export function Costs() {
                     </span>
                   </p>
                   {spendData.summary.budgetCents > 0 && (
-                    <div className="w-full h-2 border border-border overflow-hidden">
+                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={`h-full transition-[width,background-color] duration-150 ${
+                        className={`h-full rounded-full transition-[width,background-color] duration-150 ${
                           spendData.summary.utilizationPercent > 90
                             ? "bg-red-400"
                             : spendData.summary.utilizationPercent > 70
@@ -426,7 +426,7 @@ export function Costs() {
                                     <StatusBadge status="terminated" />
                                   )}
                                 </div>
-                                <div className="text-right shrink-0 ml-2">
+                                <div className="text-right shrink-0 ml-2 tabular-nums">
                                   <span className="font-medium block">{formatCents(row.costCents)}</span>
                                   <span className="text-xs text-muted-foreground block">
                                     in {formatTokens(row.inputTokens)} / out {formatTokens(row.outputTokens)} tok
@@ -459,7 +459,7 @@ export function Costs() {
                                           <span className="mx-1 text-border">/</span>
                                           <span className="font-mono">{m.model}</span>
                                         </div>
-                                        <div className="text-right shrink-0 ml-2">
+                                        <div className="text-right shrink-0 ml-2 tabular-nums">
                                           <span className="font-medium text-foreground block">
                                             {formatCents(m.costCents)}
                                             <span className="font-normal text-muted-foreground ml-1">({sharePct}%)</span>
@@ -494,9 +494,8 @@ export function Costs() {
                             className="flex items-center justify-between text-sm"
                           >
                             <span className="truncate">
-                              {row.projectName ?? row.projectId ?? "Unattributed"}
-                            </span>
-                            <span className="font-medium">{formatCents(row.costCents)}</span>
+                              {row.projectName ?? row.projectId ?? "Unattributed"}                            </span>
+                            <span className="font-medium tabular-nums">{formatCents(row.costCents)}</span>
                           </div>
                         ))}
                       </div>
@@ -535,8 +534,7 @@ export function Costs() {
                         windowRows={windowSpendByProvider.get(p) ?? []}
                         showDeficitNotch={deficitNotchByProvider.get(p) ?? false}
                         quotaWindows={quotaWindowsByProvider.get(p) ?? []}
-                      />
-                    ))}
+                      />                    ))}
                   </div>
                 )}
               </TabsContent>
